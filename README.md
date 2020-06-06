@@ -1,1 +1,1 @@
-![Image of Yaktocat](screenshot/1.png)
+![Image of Yaktocat](/screenshot/1.png)
