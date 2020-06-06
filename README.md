@@ -1,1 +1,1 @@
-![Image of Yaktocat](/screenshot/1.png ?raw=true,"Optional Title")
+![Image of Yaktocat](/screenshot/1.png?raw=true)
