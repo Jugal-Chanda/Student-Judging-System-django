@@ -4,6 +4,7 @@
 {% block 'script' %}
 
   <script type="text/javascript">
+    let chapters = ""
     $('#edit_student_image_btn').click(function(){
       image = document.getElementById('edit_student_image_field').files[0];
       formData = new FormData();
@@ -61,6 +62,7 @@
           console.log(data);
           markup = '<tr scope="row" data-subject-id="'+ data.id + '"class="subject">';
           markup += '<td>'+ data.name +'</td>';
+          markup += '<td>'+ '0.0' +'</td>';
           markup += '</tr>';
 
           tableBody = $("#subject_table");
@@ -69,6 +71,118 @@
         }
       });
     });
+
+    $('.subject').click(function() {
+      let subject_id = $(this).attr('data-subject-id');
+      $('#add_chapter_btn').attr('data-subject-id',subject_id);
+      $("#chahpter_table").empty();
+      $.ajax({
+        url: "/chapter/index/" + subject_id,
+        type: "GET",
+        data: {
+        },
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          // console.log(data.chapters);
+
+          chapters = JSON.parse(data.chapters)
+          chapters.forEach(function(obj) {
+            // console.log(obj.fields.chapter_title);
+            markup = '<tr scope="row" data-chapter-id="'+ obj.pk + '" class="chapter">';
+            markup += '<td>'+ obj.fields.chapter_title +'</td>';
+            markup += '<td>'+ obj.fields.rating +'</td>';
+            markup += '</tr>';
+
+            tableBody = $("#chahpter_table");
+            tableBody.append(markup);
+
+          });
+
+
+        }
+      });
+
+      $('#subject_card').css('display','none');
+      $('#chapter_card').css('display','block');
+    });
+
+    $('#add_chapter_btn').click(function(){
+      chapter_title = $('input[name = chapter_title]').val();
+      chapter_name = $('input[name = chapter_name]').val();
+      formData = new FormData();
+      formData.append('chapter_title',chapter_title);
+      formData.append('chapter_name',chapter_name);
+      formData.append('csrfmiddlewaretoken',$('input[name = csrfmiddlewaretoken]').val());
+      $.ajax({
+        url: "/chapter/create/" + $(this).attr('data-subject-id'),
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          // console.log(data);
+          let chapter = JSON.parse(data.chapter)
+          obj = chapter[0]
+          markup = '<tr scope="row" data-chapter-id="'+ obj.pk + '" class="chapter">';
+          markup += '<td>'+ obj.fields.chapter_title +'</td>';
+          markup += '<td>'+ '0.0' +'</td>';
+          markup += '</tr>';
+
+          tableBody = $("#chahpter_table");
+          tableBody.append(markup);
+          $('#add_chapter_model').modal('hide');
+        }
+      });
+    });
+
+    $('#add_rating_btn1').click(function(){
+      console.log(chapters);
+      $("#chapter_id_select_grp").empty();
+      chapters.forEach(function(obj) {
+        // console.log(obj.fields.chapter_title);
+        markup = '<option value="'+ obj.pk +'">' + obj.fields.chapter_title + '</option>';
+        tableBody = $("#chapter_id_select_grp");
+        tableBody.append(markup);
+      });
+
+      $('#add_mark_model').modal('show');
+      // console.log("hello");
+    });
+
+    $('#add_rating_btn2').click(function(){
+      chapter_id = $('select[name = chapter_id]').val();
+      rating = $('input[name = rating]').val();
+      description = $('textarea[name = rating_description]').val();
+      console.log(chapter_id + ", " + rating + ", " + description);
+      formData = new FormData();
+      formData.append('chapter_id',chapter_id);
+      formData.append('rating',rating);
+      formData.append('description',description);
+      formData.append('csrfmiddlewaretoken',$('input[name = csrfmiddlewaretoken]').val());
+      $.ajax({
+        url: "{% url 'chapters.addrating' %}",
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          console.log(data);
+          // let chapter = JSON.parse(data.chapter)
+          // obj = chapter[0]
+          // markup = '<tr scope="row" data-chapter-id="'+ obj.pk + '" class="chapter">';
+          // markup += '<td>'+ obj.fields.chapter_title +'</td>';
+          // markup += '<td>'+ '4.4' +'</td>';
+          // markup += '</tr>';
+          //
+          // tableBody = $("#chahpter_table");
+          // tableBody.append(markup);
+          // $('#add_chapter_model').modal('hide');
+        }
+      });
+    })
+
+
   </script>
 
 {% endblock %}
@@ -147,13 +261,15 @@
                     <thead>
                       <tr>
                         <th scope="col">Subject Name</th>
+                        <th scope="col">Rating</th>
                       </tr>
                     </thead>
                     <tbody id="subject_table">
                       <!-- Subjects Here -->
                       {% for subject in subjects %}
-                      <tr scope="row" data-subject-id="1" class="subject">
+                      <tr scope="row" data-subject-id="{{ subject.id }}" class="subject">
                         <td>{{ subject }}</td>
+                        <td>{{ subject.rating }}</td>
                       </tr>
                       {% endfor %}
                       <!-- end subject -->
@@ -192,20 +308,17 @@
                         <th scope="col">Rating</th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="chahpter_table">
                       <!-- All Chapter Here -->
-                      <tr scope="row" data-chapter-id="1" class="chapter">
-                        <td>Chapter 1 </td>
-                        <td>4.4</td>
-                      </tr>
-                      <tr scope="row" data-chapter-id="2" class="chapter">
-                        <td>Chapter 2</td>
-                        <td>4.4</td>
-                      </tr>
+
                       <!-- End Chapter -->
                     </tbody>
                   </table>
                   <div class="chapter_add_icon bg-success d-flex align-items-center justify-content-center"><i class="fas fa-plus text-white fa-lg"></i></div>
+                </div>
+                <div class="text-center">
+                  <button type="button" name="button" class="btn btn-danger btn-sm" id="add_rating_btn1">Add Rating</button>
+
                 </div>
               </div>
             </div>
@@ -271,7 +384,7 @@
           </div>
         </form>
         <div class="text-center">
-          <button type="button" name="button" class="btn btn-success btn-sm">Add Chapter</button>
+          <button type="button" name="button" class="btn btn-success btn-sm" id="add_chapter_btn" data-subject-id="">Add Chapter</button>
         </div>
       </div>
     </div>
@@ -291,18 +404,25 @@
       </div>
       <div class="modal-body">
         <form class="" action="" method="post">
+
           <div class="form-group">
-            <label for="">Chapter title</label>
+            <label for="">Choose a chapter</label>
+            <select class="form-control" name="chapter_id" id="chapter_id_select_grp">
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="">Chapter Raing(0-5)</label>
             <input type="number" name="rating" value="" min="0" max="5" step="0.1" class="form-control" required>
             <small>Add this out of 5</small>
           </div>
           <div class="form-group">
             <label for="">Add a note</label>
-            <textarea name="" rows="8" cols="80" class="form-control " required></textarea>
+            <textarea name="rating_description" rows="8" cols="80" class="form-control " required></textarea>
           </div>
         </form>
         <div class="text-center">
-          <button type="button" name="button" class="btn btn-success btn-sm">Add Mark</button>
+          <button type="button" name="button" class="btn btn-success btn-sm" id="add_rating_btn2">Add Mark</button>
         </div>
       </div>
     </div>

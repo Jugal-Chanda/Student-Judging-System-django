@@ -6,3 +6,4 @@ class Student(models.Model):
     fullname = models.CharField(max_length=40)
     email = models.EmailField(unique=True)
     phone = models.CharField(unique = True,max_length=40)
+    rating = models.FloatField(default=0.0)

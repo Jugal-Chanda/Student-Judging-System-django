@@ -6,14 +6,11 @@ $('.chapter_add_icon').click(function() {
   $('#add_chapter_model').modal('show');
 });
 
-$('.subject').click(function() {
-  $('#subject_card').css('display','none');
-  $('#chapter_card').css('display','block');
-});
 
-$('.chapter').click(function(){
-  $('#add_mark_model').modal('show');
-})
+// function chapter_clicked() {
+//
+// }
+
 
 $('.back_icon').click(function(){
   $('#subject_card').css('display','block');
