@@ -1,0 +1,125 @@
+
+{% extends "layouts/base.html" %}
+
+{% block 'script' %}
+
+  <script type="text/javascript">
+    $('#add_student_submit_btn').click(function() {
+      image = document.getElementById('student_image').files[0];
+      name = $('input[name = student_name]').val();
+      email = $('input[name = student_email]').val();
+      phone = $('input[name = student_phone]').val();
+      formData = new FormData();
+      formData.append('image',image);
+      formData.append('fullname',name);
+      formData.append('email',email);
+      formData.append('phone',phone);
+      formData.append('csrfmiddlewaretoken',$('input[name = csrfmiddlewaretoken]').val());
+      $.ajax({
+        url: {% url 'ajax.addstudents' %},
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          console.log(data);
+          markup = '<tr scope="row" data-student-id="'+ data.id + '"class="students_row">';
+          markup += '<td><img src="{{ MEDIA_URL }}/' + data.image + '" alt="" class="student_img_table"></td>';
+          markup += '<td>' +  data.fullname +'</td>';
+          markup += '<td>' +  data.email +'</td>';
+          markup += '<td>' +  data.phone +'</td>';
+          markup += '<td>' +  '5' +'</td>';
+          markup += '<td>' +  '<a href="" class="btn btn-info btn-sm">Edit</a>' +'</td>';
+          markup += '</tr>';
+
+          tableBody = $("#student_table");
+          tableBody.append(markup);
+          $('#add_student_model').modal('hide');
+        }
+      });
+    });
+
+    $('.students_row').click(function(){
+      id = $(this).attr('data-student-id');
+      location.replace("/profile/"+id);
+    });
+
+  </script>
+
+{% endblock %}
+{% block 'content' %}
+
+  <section>
+    <div class="container">
+      <table class="table table-hover" >
+        <thead>
+          <th scope="col">Image</th>
+          <th scope="col">Name</th>
+          <th scope="col">Email</th>
+          <th scope="col">Phone</th>
+          <th scope="col">Rating</th>
+          <th scope="col">Edit</th>
+        </thead>
+
+        <tbody id="student_table">
+          {% for student in studets %}
+          <tr scope="row" data-student-id="{{ student.id }}" class="students_row">
+
+            <td><img src="{{ MEDIA_URL }}/{{ student.image.url }}" alt="" class="student_img_table"></td>
+            <td>{{ student.fullname }}</td>
+            <td>{{ student.email }}</td>
+            <td>{{ student.phone }}</td>
+            <td>5</td>
+            <td>
+              <a href="" class="btn btn-info btn-sm">Edit</a>
+            </td>
+
+          </tr>
+          {% endfor %}
+
+        </tbody>
+
+      </table>
+
+    </div>
+  </section>
+<div class="add_student_div bg-success d-flex align-items-center justify-content-center"><i class="fas fa-plus text-white fa-lg"></i></div>
+
+<div class="modal fade" id="add_student_model" tabindex="-1" role="dialog" aria-labelledby="Add Student" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="">Add New Student</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="add_student_form"class="" action="" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="">Student image</label>
+            <input type="file" name="student_image" value="" id="student_image" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="">Student Name</label>
+            <input type="text" name="student_name" value="" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="">Student email</label>
+            <input type="email" name="student_email" value="" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="">Student phone</label>
+            <input type="phone" name="student_phone" value="" class="form-control" required>
+          </div>
+        </form>
+        <div class="text-center">
+          <button type="button" name="button" class="btn btn-success btn-sm" id="add_student_submit_btn">Add Student</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
