@@ -1,1 +1,1 @@
-![Image of Yaktocat](/screenshot/1.png?raw=true)
+<img src="/screenshot/1.png">
