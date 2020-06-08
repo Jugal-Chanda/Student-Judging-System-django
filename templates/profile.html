@@ -5,6 +5,7 @@
 
   <script type="text/javascript">
     let chapters = ""
+    // For editiing profile image
     $('#edit_student_image_btn').click(function(){
       image = document.getElementById('edit_student_image_field').files[0];
       formData = new FormData();
@@ -23,6 +24,7 @@
       });
     });
 
+    // For editing profile info
     $('#edit_profile_info_btn').click(function() {
       name = $('input[name = student_name]').val();
       email = $('input[name = student_email]').val();
@@ -47,6 +49,7 @@
       });
     });
 
+    // for adding new subjects
     $('#add_subject_btn').click(function(){
       name = $('input[name = subject_name]').val();
       formData = new FormData();
@@ -72,8 +75,11 @@
       });
     });
 
-    $('.subject').click(function() {
+    // for showing chapters of specifiq subjects
+    $("#subject_table").on("click", "tr", function(event){
       let subject_id = $(this).attr('data-subject-id');
+      let subject_name = $('#subject_table tr[data-subject-id = '+ subject_id +'] td:nth-child(1)').text();
+      $('#chapter_card_title').text('All Chapters of '+subject_name)
       $('#add_chapter_btn').attr('data-subject-id',subject_id);
       $("#chahpter_table").empty();
       $.ajax({
@@ -107,6 +113,7 @@
       $('#chapter_card').css('display','block');
     });
 
+    //For adding new chapters
     $('#add_chapter_btn').click(function(){
       chapter_title = $('input[name = chapter_title]').val();
       chapter_name = $('input[name = chapter_name]').val();
@@ -136,25 +143,14 @@
       });
     });
 
-    $('#add_rating_btn1').click(function(){
-      console.log(chapters);
-      $("#chapter_id_select_grp").empty();
-      chapters.forEach(function(obj) {
-        // console.log(obj.fields.chapter_title);
-        markup = '<option value="'+ obj.pk +'">' + obj.fields.chapter_title + '</option>';
-        tableBody = $("#chapter_id_select_grp");
-        tableBody.append(markup);
-      });
 
-      $('#add_mark_model').modal('show');
-      // console.log("hello");
-    });
 
+
+    //For add rating of each chapter
     $('#add_rating_btn2').click(function(){
-      chapter_id = $('select[name = chapter_id]').val();
+      chapter_id = $(this).attr('data-chapter-id');
       rating = $('input[name = rating]').val();
       description = $('textarea[name = rating_description]').val();
-      console.log(chapter_id + ", " + rating + ", " + description);
       formData = new FormData();
       formData.append('chapter_id',chapter_id);
       formData.append('rating',rating);
@@ -167,17 +163,9 @@
         processData: false,
         contentType: false,
         success: function (data) {
-          console.log(data);
-          // let chapter = JSON.parse(data.chapter)
-          // obj = chapter[0]
-          // markup = '<tr scope="row" data-chapter-id="'+ obj.pk + '" class="chapter">';
-          // markup += '<td>'+ obj.fields.chapter_title +'</td>';
-          // markup += '<td>'+ '4.4' +'</td>';
-          // markup += '</tr>';
-          //
-          // tableBody = $("#chahpter_table");
-          // tableBody.append(markup);
-          // $('#add_chapter_model').modal('hide');
+          // console.log(data);
+          $('#chahpter_table tr[data-chapter-id = '+chapter_id+'] td:nth-child(2)').text(rating);
+          $('#add_mark_model').modal('hide');
         }
       });
     })
@@ -190,151 +178,148 @@
 
 {% block 'content' %}
 <!-- Start section -->
-<section>
-  <div class="container mt-2">
 
-    <div class="row">
-      <!-- Student Profile Information -->
-      <div class="col-md-4" id="">
-        <div class="card" id="">
-          <div class="card-body">
-            <div class="text-center">
-              <img src="{{ MEDIA_URL }}/{{ student.image.url }}" alt="" class="profile_image" id="profile_image">
-            </div>
-            <!-- UPload Image -->
-            <div class="mt-2">
-              <form class="" id="update_image">
-                {% csrf_token %}
-                <div class="">
-                  <input type="file" class="student_profile_info" id="edit_student_image_field" placeholder="Upload Image ">
+  <section>
+    <div class="container mt-2">
+
+      <div class="row">
+        <!-- Student Profile Information -->
+        <div class="col-md-4" id="">
+          <div class="card" id="">
+            <div class="card-body">
+              <div class="text-center">
+                <img src="{{ MEDIA_URL }}/{{ student.image.url }}" alt="" class="profile_image" id="profile_image">
+              </div>
+              <!-- UPload Image -->
+              <div class="mt-2">
+                <form class="" id="update_image">
+                  {% csrf_token %}
+                  <div class="">
+                    <input type="file" class="student_profile_info" id="edit_student_image_field" placeholder="Upload Image ">
+                  </div>
+                </form>
+                <div class="text-center my-2">
+                  <button type="submit" class="btn btn-success btn-sm" id="edit_student_image_btn">Upload</button>
                 </div>
-              </form>
-              <div class="text-center my-2">
-                <button type="submit" class="btn btn-success btn-sm" id="edit_student_image_btn">Upload</button>
               </div>
-            </div>
-            <!-- end upload image -->
-            <div class="">
-              <!-- Edit Profile info -->
-              <form class="" action="" method="post">
-                {% csrf_token %}
-                <table  class="table my-0" id="profile_info_table">
+              <!-- end upload image -->
+              <div class="">
+                <!-- Edit Profile info -->
+                <form class="" action="" method="post">
+                  {% csrf_token %}
+                  <table  class="table my-0" id="profile_info_table">
 
-                    <tr>
-                      <td>Name</td>
-                      <td> <input type="text" name="student_name" value="{{ student.fullname }}" class="student_profile_info" ></td>
-                    </tr>
-                    <tr>
-                      <td>Phone</td>
-                      <td><input type="text" name="student_phone" value="{{ student.phone }}" class="student_profile_info" ></td>
-                    </tr>
-                    <tr>
-                      <td>Email</td>
-                      <td><input type="email" name="student_email" value="{{ student.email }}" class="student_profile_info"></td>
-                    </tr>
-                </table>
-
-              </form>
-              <div class="text-center my-2">
-                <button type="submit" name="button" class="btn btn-success btn-sm" id="edit_profile_info_btn">Save Changes</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- end student prodile information -->
-      <div class="col-md-8">
-        <!-- Subject Card -->
-        <div class="card" id="subject_card">
-          <div class="card-header">
-
-            <h3 class="text-center">Added Subjects</h3>
-
-          </div>
-
-          <div class="card-body">
-
-            <div class="row">
-              <div class="col-lg-8 offset-lg-2">
-                <div class="subject_table_container">
-                  <table class="table table-bordered subject_table">
-                    <thead>
                       <tr>
-                        <th scope="col">Subject Name</th>
-                        <th scope="col">Rating</th>
+                        <td>Name</td>
+                        <td> <input type="text" name="student_name" value="{{ student.fullname }}" class="student_profile_info" ></td>
                       </tr>
-                    </thead>
-                    <tbody id="subject_table">
-                      <!-- Subjects Here -->
-                      {% for subject in subjects %}
-                      <tr scope="row" data-subject-id="{{ subject.id }}" class="subject">
-                        <td>{{ subject }}</td>
-                        <td>{{ subject.rating }}</td>
-                      </tr>
-                      {% endfor %}
-                      <!-- end subject -->
-                    </tbody>
-                  </table>
-                  <div class="subject_add_icon bg-success d-flex align-items-center justify-content-center"><i class="fas fa-plus text-white fa-lg"></i></div>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-          <!-- end subject card body -->
-
-        </div>
-        <!-- End Subject Card -->
-
-        <!-- Chapter Card -->
-        <div class="card" id="chapter_card">
-          <div class="card-header">
-            <div class="header_wapper">
-              <h3 class="text-center">All Chapters of Bangla</h3>
-              <div class="back_icon"><i class="fas fa-arrow-left fa-lg"></i> </div>
-            </div>
-
-          </div>
-          <div class="card-body">
-
-            <div class="row">
-              <div class="col-lg-8 offset-lg-2">
-                <div class="subject_table_container">
-                  <table class="table table-bordered subject_table">
-                    <thead>
                       <tr>
-                        <th scope="col">Chapter Name</th>
-                        <th scope="col">Rating</th>
+                        <td>Phone</td>
+                        <td><input type="text" name="student_phone" value="{{ student.phone }}" class="student_profile_info" ></td>
                       </tr>
-                    </thead>
-                    <tbody id="chahpter_table">
-                      <!-- All Chapter Here -->
-
-                      <!-- End Chapter -->
-                    </tbody>
+                      <tr>
+                        <td>Email</td>
+                        <td><input type="email" name="student_email" value="{{ student.email }}" class="student_profile_info"></td>
+                      </tr>
                   </table>
-                  <div class="chapter_add_icon bg-success d-flex align-items-center justify-content-center"><i class="fas fa-plus text-white fa-lg"></i></div>
-                </div>
-                <div class="text-center">
-                  <button type="button" name="button" class="btn btn-danger btn-sm" id="add_rating_btn1">Add Rating</button>
 
+                </form>
+                <div class="text-center my-2">
+                  <button type="submit" name="button" class="btn btn-success btn-sm" id="edit_profile_info_btn">Save Changes</button>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+        <!-- end student prodile information -->
+        <div class="col-md-8">
+          <!-- Subject Card -->
+          <div class="card" id="subject_card">
+            <div class="card-header">
+
+              <h3 class="text-center">Added Subjects</h3>
+
+            </div>
+
+            <div class="card-body">
+
+              <div class="row">
+                <div class="col-lg-8 offset-lg-2">
+                  <div class="subject_table_container">
+                    <table class="table table-bordered subject_table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Subject Name</th>
+                          <th scope="col">Rating</th>
+                        </tr>
+                      </thead>
+                      <tbody id="subject_table">
+                        <!-- Subjects Here -->
+                        {% for subject in subjects %}
+                        <tr scope="row" data-subject-id="{{ subject.id }}" class="subject">
+                          <td>{{ subject }}</td>
+                          <td>{{ subject.rating }}</td>
+                        </tr>
+                        {% endfor %}
+                        <!-- end subject -->
+                      </tbody>
+                    </table>
+                    <div class="subject_add_icon bg-success d-flex align-items-center justify-content-center"><i class="fas fa-plus text-white fa-lg"></i></div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+            <!-- end subject card body -->
 
           </div>
-          <!-- End Chapter Card body -->
+          <!-- End Subject Card -->
 
+          <!-- Chapter Card -->
+          <div class="card" id="chapter_card">
+            <div class="card-header">
+              <div class="header_wapper">
+                <h3 class="text-center" id="chapter_card_title">All Chapters of Bangla</h3>
+                <div class="back_icon"><i class="fas fa-arrow-left fa-lg"></i> </div>
+              </div>
+
+            </div>
+            <div class="card-body">
+
+              <div class="row">
+                <div class="col-lg-8 offset-lg-2">
+                  <div class="subject_table_container">
+                    <table class="table table-bordered subject_table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Chapter Name</th>
+                          <th scope="col">Rating</th>
+                        </tr>
+                      </thead>
+                      <tbody id="chahpter_table">
+                        <!-- All Chapter Here -->
+
+                        <!-- End Chapter -->
+                      </tbody>
+                    </table>
+                    <div class="chapter_add_icon bg-success d-flex align-items-center justify-content-center"><i class="fas fa-plus text-white fa-lg"></i></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+            <!-- End Chapter Card body -->
+
+          </div>
+          <!-- End Chapter Card -->
         </div>
-        <!-- End Chapter Card -->
+
       </div>
 
     </div>
 
-  </div>
-
-</section>
+  </section>
 <!-- End section -->
 <!-- Model For adding new subject -->
 <div class="modal fade" id="add_subject_model" tabindex="-1" role="dialog" aria-labelledby="Add Subject" aria-hidden="true">
@@ -404,13 +389,6 @@
       </div>
       <div class="modal-body">
         <form class="" action="" method="post">
-
-          <div class="form-group">
-            <label for="">Choose a chapter</label>
-            <select class="form-control" name="chapter_id" id="chapter_id_select_grp">
-            </select>
-          </div>
-
           <div class="form-group">
             <label for="">Chapter Raing(0-5)</label>
             <input type="number" name="rating" value="" min="0" max="5" step="0.1" class="form-control" required>
@@ -422,7 +400,7 @@
           </div>
         </form>
         <div class="text-center">
-          <button type="button" name="button" class="btn btn-success btn-sm" id="add_rating_btn2">Add Mark</button>
+          <button type="button" name="button" class="btn btn-success btn-sm" id="add_rating_btn2" data-chapter-id="">Add Mark</button>
         </div>
       </div>
     </div>

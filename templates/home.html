@@ -4,7 +4,10 @@
 {% block 'script' %}
 
   <script type="text/javascript">
+
+    // Add new student ajax submit
     $('#add_student_submit_btn').click(function() {
+      url = $(this).attr('data-action-url')
       image = document.getElementById('student_image').files[0];
       name = $('input[name = student_name]').val();
       email = $('input[name = student_email]').val();
@@ -16,7 +19,7 @@
       formData.append('phone',phone);
       formData.append('csrfmiddlewaretoken',$('input[name = csrfmiddlewaretoken]').val());
       $.ajax({
-        url: {% url 'ajax.addstudents' %},
+        url: url,
         type: "POST",
         data: formData,
         processData: false,
@@ -28,8 +31,7 @@
           markup += '<td>' +  data.fullname +'</td>';
           markup += '<td>' +  data.email +'</td>';
           markup += '<td>' +  data.phone +'</td>';
-          markup += '<td>' +  '5' +'</td>';
-          markup += '<td>' +  '<a href="" class="btn btn-info btn-sm">Edit</a>' +'</td>';
+          markup += '<td>' +  '0.0' +'</td>';
           markup += '</tr>';
 
           tableBody = $("#student_table");
@@ -39,10 +41,13 @@
       });
     });
 
-    $('.students_row').click(function(){
-      id = $(this).attr('data-student-id');
-      location.replace("/profile/"+id);
-    });
+
+
+
+    // $('.students_row').click(function(){
+    //   id = $(this).attr('data-student-id');
+    //   location.replace("/profile/"+id);
+    // });
 
   </script>
 
@@ -58,7 +63,6 @@
           <th scope="col">Email</th>
           <th scope="col">Phone</th>
           <th scope="col">Rating</th>
-          <th scope="col">Edit</th>
         </thead>
 
         <tbody id="student_table">
@@ -70,10 +74,6 @@
             <td>{{ student.email }}</td>
             <td>{{ student.phone }}</td>
             <td>{{ student.rating }}</td>
-            <td>
-              <a href="" class="btn btn-info btn-sm">Edit</a>
-            </td>
-
           </tr>
           {% endfor %}
 
@@ -115,7 +115,7 @@
           </div>
         </form>
         <div class="text-center">
-          <button type="button" name="button" class="btn btn-success btn-sm" id="add_student_submit_btn">Add Student</button>
+          <button type="button" name="button" class="btn btn-success btn-sm" id="add_student_submit_btn" data-action-url="/addstudents/">Add Student</button>
         </div>
       </div>
     </div>
